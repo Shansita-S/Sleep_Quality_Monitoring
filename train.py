@@ -11,7 +11,8 @@ import os
 import joblib  # For saving/loading the pipeline
 
 # --- Load and shuffle dataset ---
-drug_df = pd.read_csv(r"data\drug200.csv")  # raw string for Windows paths
+drug_df = pd.read_csv("data/drug200.csv")
+  # raw string for Windows paths
 drug_df = drug_df.sample(frac=1, random_state=42)
 print("First 3 rows:\n", drug_df.head(3))
 
