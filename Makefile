@@ -28,9 +28,9 @@ hf-login:
 
 push-hub:
 	cp Model/drug_pipeline.joblib app/drug_pipeline.joblib || echo "Could not copy model to app folder"
-hf upload shansita-s/Sleep_Quality_Monitoring ./app --repo-type=space --commit-message="Sync App files"
-hf upload shansita-s/Sleep_Quality_Monitoring ./Model --repo-type=space --commit-message="Sync Model"
-hf upload shansita-s/Sleep_Quality_Monitoring ./Results --repo-type=space --commit-message="Sync Results"
+	hf upload shansita-s/Sleep_Quality_Monitoring ./app --repo-type=space --commit-message="Sync App files"
+	hf upload shansita-s/Sleep_Quality_Monitoring ./Model --repo-type=space --commit-message="Sync Model"
+	hf upload shansita-s/Sleep_Quality_Monitoring ./Results --repo-type=space --commit-message="Sync Results"
 
 deploy: hf-login push-hub
 
