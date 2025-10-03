@@ -1,29 +1,89 @@
-
-name: CI
+name: Model Training and Deployment CI
 
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+  pull-requests: write
 
 jobs:
-  build:
+  train-and-deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
       with:
-        python-version: '3.10'
-
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
     - name: Install dependencies
+      run: make install
+      
+    - name: Train model
+      run: make train
+      
+    - name: Evaluate model and create report
+      run: make eval
+        
+    - name: Upload model artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: model-artifacts
+        path: |
+          Model/
+          Results/
+          report.md
+        retention-days: 30
+        
+    - name: Deploy to Hugging Face
+      if: github.ref == 'refs/heads/main'
+      run: make deploy
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        
+    - name: Create Release
+      if: github.ref == 'refs/heads/main'
       run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-    - name: Run tests
-      run: |
-        if [ -f pytest.ini ] || [ -d tests ]; then pytest; fi
+        if [ -f Model/drug_pipeline.joblib ] && [ -f Results/metrics.txt ]; then
+          gh release create model-v${{ github.run_number }} \
+            --title "Model Release v${{ github.run_number }}" \
+            --notes "Automated model training and deployment
+            
+            ## Model Performance
+            Check the uploaded artifacts for detailed metrics and confusion matrix.
+            
+            ## Changes
+            - Model trained on latest data
+            - Performance metrics updated
+            - Deployed to Hugging Face Spaces" \
+            Model/drug_pipeline.joblib \
+            Results/metrics.txt \
+            Results/model_results.png || echo "Some files missing, skipping file upload"
+        else
+          echo "Model or results files not found, creating release without files"
+          gh release create model-v${{ github.run_number }} \
+            --title "Model Release v${{ github.run_number }}" \
+            --notes "Automated model training and deployment - files available in artifacts"
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
