@@ -24,23 +24,17 @@ update-branch:
 # deploy: log in to HF CLI & upload files to Space repo
 hf-login:
 	python -m pip install -U "huggingface_hub[cli]"
-	huggingface-cli login --token $(HF_TOKEN) --add-to-git-credential
+	huggingface-cli login --token $(HF_TOKEN)
 
 push-hub:
 	cp model/drug_pipeline.joblib drug_pipeline.joblib || echo "Could not copy model to root"
 	cp results/results.txt results.txt || echo "Could not copy results to root"
 	cp results/model_results.png model_results.png || echo "Could not copy plot to root"
 	ls -la *.py *.joblib *.txt *.md requirements.txt || echo "Some files missing"
-	huggingface-cli repo create shansita-s/Sleep_Quality_Monitoring --type=space --sdk=gradio --exist-ok
-	git clone https://huggingface.co/spaces/shansita-s/Sleep_Quality_Monitoring hf_space || echo "Clone failed"
-	cp app.py hf_space/ || echo "Copy app failed"
-	cp drug_pipeline.joblib hf_space/ || echo "Copy model failed"
-	cp requirements.txt hf_space/ || echo "Copy requirements failed"
-	cp README.md hf_space/ || echo "Copy README failed"
-	cp results.txt hf_space/ || echo "Copy results failed"
-	cp model_results.png hf_space/ || echo "Copy plot failed"
-	cd hf_space && git add . && git commit -m "Deploy app" && git push
-	rm -rf hf_space
+	huggingface-cli upload shansita-s/Sleep_Quality_Monitoring ./app.py --repo-type=space --commit-message="Upload app.py"
+	huggingface-cli upload shansita-s/Sleep_Quality_Monitoring ./drug_pipeline.joblib --repo-type=space --commit-message="Upload model"
+	huggingface-cli upload shansita-s/Sleep_Quality_Monitoring ./requirements.txt --repo-type=space --commit-message="Upload requirements"
+	huggingface-cli upload shansita-s/Sleep_Quality_Monitoring ./README.md --repo-type=space --commit-message="Upload README"
 
 deploy: hf-login push-hub
 
