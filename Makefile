@@ -30,8 +30,17 @@ push-hub:
 	cp model/drug_pipeline.joblib drug_pipeline.joblib || echo "Could not copy model to root"
 	cp results/results.txt results.txt || echo "Could not copy results to root"
 	cp results/model_results.png model_results.png || echo "Could not copy plot to root"
-	cp app/app.py app.py || echo "Could not copy app to root"
-	huggingface-cli upload shansita-s/Sleep_Quality_Monitoring . --repo-type=space --commit-message="Deploy complete app" --include="*.py,*.joblib,*.txt,*.png,*.md,requirements.txt"
+	ls -la *.py *.joblib *.txt *.md requirements.txt || echo "Some files missing"
+	huggingface-cli repo create shansita-s/Sleep_Quality_Monitoring --type=space --sdk=gradio --exist-ok
+	git clone https://huggingface.co/spaces/shansita-s/Sleep_Quality_Monitoring hf_space || echo "Clone failed"
+	cp app.py hf_space/ || echo "Copy app failed"
+	cp drug_pipeline.joblib hf_space/ || echo "Copy model failed"
+	cp requirements.txt hf_space/ || echo "Copy requirements failed"
+	cp README.md hf_space/ || echo "Copy README failed"
+	cp results.txt hf_space/ || echo "Copy results failed"
+	cp model_results.png hf_space/ || echo "Copy plot failed"
+	cd hf_space && git add . && git commit -m "Deploy app" && git push
+	rm -rf hf_space
 
 deploy: hf-login push-hub
 

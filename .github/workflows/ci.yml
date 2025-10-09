@@ -57,7 +57,15 @@ jobs:
         
     - name: Deploy to Hugging Face
       if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/update'
-      run: make deploy
+      run: |
+        echo "Starting HF deployment..."
+        if [ -z "$HF_TOKEN" ]; then
+          echo "❌ HF_TOKEN is not set"
+          exit 1
+        else
+          echo "✅ HF_TOKEN is available"
+        fi
+        make deploy
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
         
