@@ -1,6 +1,6 @@
 install:
 	python -m pip install --upgrade pip
-	python -m pip install -r app/requirements.txt
+	python -m pip install -r requirements.txt
 
 train:
 	python train.py
@@ -24,17 +24,19 @@ update-branch:
 # deploy: log in to HF CLI & upload files to Space repo
 hf-login:
 	python -m pip install -U "huggingface_hub[cli]"
-	huggingface-cli login --token $(HF_TOKEN)
+	echo "Logging into Hugging Face..."
+	python -c "from huggingface_hub import login; import os; login(token=os.environ['HF_TOKEN'])"
 
 push-hub:
 	cp model/drug_pipeline.joblib drug_pipeline.joblib || echo "Could not copy model to root"
 	cp results/results.txt results.txt || echo "Could not copy results to root"
 	cp results/model_results.png model_results.png || echo "Could not copy plot to root"
 	ls -la *.py *.joblib *.txt *.md requirements.txt || echo "Some files missing"
-	huggingface-cli upload shansita-s/Sleep_Quality_Monitoring ./app.py --repo-type=space --commit-message="Upload app.py"
-	huggingface-cli upload shansita-s/Sleep_Quality_Monitoring ./drug_pipeline.joblib --repo-type=space --commit-message="Upload model"
-	huggingface-cli upload shansita-s/Sleep_Quality_Monitoring ./requirements.txt --repo-type=space --commit-message="Upload requirements"
-	huggingface-cli upload shansita-s/Sleep_Quality_Monitoring ./README.md --repo-type=space --commit-message="Upload README"
+	python -c "from huggingface_hub import HfApi; api = HfApi(); api.create_repo('shansita-s/Sleep_Quality_Monitoring', repo_type='space', space_sdk='gradio', exist_ok=True)"
+	python -c "from huggingface_hub import HfApi; api = HfApi(); api.upload_file(path_or_fileobj='./app.py', path_in_repo='app.py', repo_id='shansita-s/Sleep_Quality_Monitoring', repo_type='space')"
+	python -c "from huggingface_hub import HfApi; api = HfApi(); api.upload_file(path_or_fileobj='./drug_pipeline.joblib', path_in_repo='drug_pipeline.joblib', repo_id='shansita-s/Sleep_Quality_Monitoring', repo_type='space')"
+	python -c "from huggingface_hub import HfApi; api = HfApi(); api.upload_file(path_or_fileobj='./requirements.txt', path_in_repo='requirements.txt', repo_id='shansita-s/Sleep_Quality_Monitoring', repo_type='space')"
+	python -c "from huggingface_hub import HfApi; api = HfApi(); api.upload_file(path_or_fileobj='./README.md', path_in_repo='README.md', repo_id='shansita-s/Sleep_Quality_Monitoring', repo_type='space')"
 
 deploy: hf-login push-hub
 
