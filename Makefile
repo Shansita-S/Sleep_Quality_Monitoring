@@ -27,10 +27,11 @@ hf-login:
 	huggingface-cli login --token $(HF_TOKEN) --add-to-git-credential
 
 push-hub:
-	cp model/drug_pipeline.joblib app/drug_pipeline.joblib || echo "Could not copy model to app folder"
-	huggingface-cli upload shansita-s/Sleep_Quality_Monitoring ./app --repo-type=space --commit-message="Sync App files"
-	huggingface-cli upload shansita-s/Sleep_Quality_Monitoring ./model --repo-type=space --commit-message="Sync Model"
-	huggingface-cli upload shansita-s/Sleep_Quality_Monitoring ./results --repo-type=space --commit-message="Sync Results"
+	cp model/drug_pipeline.joblib drug_pipeline.joblib || echo "Could not copy model to root"
+	cp results/results.txt results.txt || echo "Could not copy results to root"
+	cp results/model_results.png model_results.png || echo "Could not copy plot to root"
+	cp app/app.py app.py || echo "Could not copy app to root"
+	huggingface-cli upload shansita-s/Sleep_Quality_Monitoring . --repo-type=space --commit-message="Deploy complete app" --include="*.py,*.joblib,*.txt,*.png,*.md,requirements.txt"
 
 deploy: hf-login push-hub
 
