@@ -54,8 +54,8 @@ f1 = f1_score(y_test, predictions, average="macro")
 print(f"Accuracy: {round(accuracy * 100, 2)}%, F1 Score: {round(f1, 2)}")
 
 # --- Save results to file ---
-os.makedirs("Results", exist_ok=True)
-with open("Results/results.txt", "w") as outfile:
+os.makedirs("results", exist_ok=True)
+with open("results/results.txt", "w") as outfile:
     outfile.write(f"Accuracy = {round(accuracy, 2)}, F1 Score = {round(f1, 2)}.\n")
 
 # --- Confusion matrix ---
@@ -63,14 +63,14 @@ cm = confusion_matrix(y_test, predictions, labels=pipe.classes_)
 disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=pipe.classes_)
 disp.plot()
 plt.title("Confusion Matrix")
-plt.savefig("Results/model_results.png", dpi=120)
+plt.savefig("results/model_results.png", dpi=120)
 plt.show()
 
 # --- Save the trained pipeline ---
-os.makedirs("Model", exist_ok=True)
-joblib.dump(pipe, "Model/drug_pipeline.joblib")
-print("Pipeline saved to Model/drug_pipeline.joblib")
+os.makedirs("model", exist_ok=True)
+joblib.dump(pipe, "model/drug_pipeline.joblib")
+print("Pipeline saved to model/drug_pipeline.joblib")
 
 # --- Load the pipeline (example) ---
-loaded_pipe = joblib.load("Model/drug_pipeline.joblib")
+loaded_pipe = joblib.load("model/drug_pipeline.joblib")
 print("Pipeline loaded successfully.")

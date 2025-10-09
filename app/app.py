@@ -7,8 +7,10 @@ import os
 print(f"Current working directory: {os.getcwd()}")
 print(f"Files in current directory: {os.listdir('.')}")
 
-# Check if Model directory exists
-if os.path.exists("Model"):
+# Check if model directory exists
+if os.path.exists("model"):
+    print(f"Files in model directory: {os.listdir('model')}")
+elif os.path.exists("Model"):
     print(f"Files in Model directory: {os.listdir('Model')}")
 else:
     print("Model directory not found")
@@ -17,8 +19,11 @@ else:
 pipe = None
 model_paths = [
     "drug_pipeline.joblib",  # Direct in app folder
+    "model/drug_pipeline.joblib",  # Lowercase model folder
     "Model/drug_pipeline.joblib",  # HuggingFace Spaces structure
+    "../model/drug_pipeline.joblib",  # Local development lowercase
     "../Model/drug_pipeline.joblib",  # Local development
+    "./model/drug_pipeline.joblib",  # Alternative path lowercase
     "./Model/drug_pipeline.joblib"  # Alternative path
 ]
 
@@ -173,7 +178,7 @@ Built with ❤️ using Gradio and Scikit-learn
 """
 
 # Create and launch the Gradio interface
-if _name_ == "_main_":
+if __name__ == "__main__":
     demo = gr.Interface(
         fn=predict_drug,
         inputs=inputs,
@@ -186,4 +191,4 @@ if _name_ == "_main_":
         allow_flagging="never",
     )
     
-    demo.launch(share=True)
+    demo.launch(share=False, server_name="127.0.0.1", server_port=7860)

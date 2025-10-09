@@ -7,17 +7,17 @@ train:
 
 eval:
 	echo "## Model Metrics" > report.md
-	test -f Results/metrics.txt && cat Results/metrics.txt >> report.md || echo "No metrics file found"
+	test -f results/results.txt && cat results/results.txt >> report.md || echo "No metrics file found"
 	echo "" >> report.md
 	echo "## Confusion Matrix Plot" >> report.md
-	echo "![Confusion Matrix](./Results/model_results.png)" >> report.md
+	echo "![Confusion Matrix](./results/model_results.png)" >> report.md
 
 # create an "update" branch, commit model & results, push
 update-branch:
 	git config --global user.name "github-actions[bot]"
 	git config --global user.email "github-actions[bot]@users.noreply.github.com"
 	git checkout -B update
-	git add Model Results
+	git add model results
 	git commit -m "Update model and results [automated]" || echo "No changes to commit"
 	git push --force origin update
 
@@ -27,16 +27,16 @@ hf-login:
 	huggingface-cli login --token $(HF_TOKEN) --add-to-git-credential
 
 push-hub:
-	cp Model/drug_pipeline.joblib app/drug_pipeline.joblib || echo "Could not copy model to app folder"
-	hf upload shansita-s/Sleep_Quality_Monitoring ./app --repo-type=space --commit-message="Sync App files"
-	hf upload shansita-s/Sleep_Quality_Monitoring ./Model --repo-type=space --commit-message="Sync Model"
-	hf upload shansita-s/Sleep_Quality_Monitoring ./Results --repo-type=space --commit-message="Sync Results"
+	cp model/drug_pipeline.joblib app/drug_pipeline.joblib || echo "Could not copy model to app folder"
+	huggingface-cli upload shansita-s/Sleep_Quality_Monitoring ./app --repo-type=space --commit-message="Sync App files"
+	huggingface-cli upload shansita-s/Sleep_Quality_Monitoring ./model --repo-type=space --commit-message="Sync Model"
+	huggingface-cli upload shansita-s/Sleep_Quality_Monitoring ./results --repo-type=space --commit-message="Sync Results"
 
 deploy: hf-login push-hub
 
 # Clean generated files
 clean:
-	rm -rf Model Results *.png *.txt report.md
+	rm -rf model results *.png *.txt report.md
 	rm -rf __pycache__ .pytest_cache
 
 # Run the Gradio app locally

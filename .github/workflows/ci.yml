@@ -49,21 +49,21 @@ jobs:
       with:
         name: model-artifacts
         path: |
-          Model/
-          Results/
+          model/
+          results/
           report.md
         retention-days: 30
         
     - name: Deploy to Hugging Face
-      if: github.ref == 'refs/heads/main'
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/update'
       run: make deploy
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
         
     - name: Create Release
-      if: github.ref == 'refs/heads/main'
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/update'
       run: |
-        if [ -f Model/drug_pipeline.joblib ] && [ -f Results/metrics.txt ]; then
+        if [ -f model/drug_pipeline.joblib ] && [ -f results/results.txt ]; then
           gh release create model-v${{ github.run_number }} \
             --title "Model Release v${{ github.run_number }}" \
             --notes "Automated model training and deployment
@@ -75,9 +75,9 @@ jobs:
             - Model trained on latest data
             - Performance metrics updated
             - Deployed to Hugging Face Spaces" \
-            Model/drug_pipeline.joblib \
-            Results/metrics.txt \
-            Results/model_results.png || echo "Some files missing, skipping file upload"
+            model/drug_pipeline.joblib \
+            results/results.txt \
+            results/model_results.png || echo "Some files missing, skipping file upload"
         else
           echo "Model or results files not found, creating release without files"
           gh release create model-v${{ github.run_number }} \
