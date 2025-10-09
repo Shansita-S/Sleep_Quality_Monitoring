@@ -2,6 +2,7 @@ name: Model Training and Deployment CI
 
 on:
   push:
+    branches: [ main, update ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
