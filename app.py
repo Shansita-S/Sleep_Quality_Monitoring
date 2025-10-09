@@ -3,18 +3,6 @@ import joblib
 import numpy as np
 import os
 
-# Debug: Print current working directory and list files
-print(f"Current working directory: {os.getcwd()}")
-print(f"Files in current directory: {os.listdir('.')}")
-
-# Check if model directory exists
-if os.path.exists("model"):
-    print(f"Files in model directory: {os.listdir('model')}")
-elif os.path.exists("Model"):
-    print(f"Files in Model directory: {os.listdir('Model')}")
-else:
-    print("Model directory not found")
-
 # Load the trained model
 pipe = None
 model_paths = [
@@ -31,12 +19,10 @@ for path in model_paths:
     try:
         if os.path.exists(path):
             pipe = joblib.load(path)
-            print(f"✅ Model loaded successfully from: {path}")
+            print(f"✅ Model loaded from: {path}")
             break
-        else:
-            print(f"❌ Model not found at: {path}")
     except Exception as e:
-        print(f"❌ Error loading model from {path}: {str(e)}")
+        print(f"❌ Error: {str(e)}")
 
 if pipe is None:
     print("🔥 CRITICAL: No model could be loaded from any path!")
@@ -140,10 +126,7 @@ outputs = [gr.Label(num_top_classes=5, label="Drug Prediction")]
 # Example inputs for testing
 examples = [
     [30, "M", "HIGH", "NORMAL", 15.4],
-    [35, "F", "LOW", "NORMAL", 8.0],
     [50, "M", "HIGH", "HIGH", 34.0],
-    [25, "F", "NORMAL", "HIGH", 20.0],
-    [60, "M", "LOW", "NORMAL", 12.5],
 ]
 
 # App title and description
@@ -188,8 +171,13 @@ if __name__ == "__main__":
         description=description,
         article=article,
         theme=gr.themes.Soft(),
-        allow_flagging="never",
+        flagging_mode="never",
         cache_examples=False,  # Disable example caching for faster startup
     )
     
-    demo.launch()
+    demo.launch(
+        show_error=True,
+        quiet=False,
+        show_tips=False,
+        enable_queue=False
+    )
